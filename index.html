@@ -170,7 +170,10 @@
 
             <!-- Log -->
             <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow overflow-x-auto border dark:border-gray-700">
-                <h3 class="text-lg font-bold mb-4">📜 سجل الحركات المالية</h3>
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold">📜 سجل الحركات المالية</h3>
+                    <button id="clear-all-tx-btn" onclick="clearAllTransactions()" class="hidden bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white px-3 py-1 rounded-lg text-xs font-bold transition">مسح كل السجل 🗑️</button>
+                </div>
                 <table class="w-full text-right border-collapse">
                     <thead>
                         <tr class="border-b dark:border-gray-700 text-gray-500">
@@ -178,6 +181,7 @@
                             <th class="p-3">النوع</th>
                             <th class="p-3">التفاصيل</th>
                             <th class="p-3">المبلغ</th>
+                            <th class="p-3" id="tx-action-header">حذف</th>
                         </tr>
                     </thead>
                     <tbody id="transactions-table"></tbody>
@@ -264,12 +268,16 @@
                 document.getElementById('user-role-badge').innerText = 'مدير النظام (تحكم كامل)';
                 document.getElementById('admin-controls').classList.remove('hidden');
                 document.getElementById('admin-investors-list').classList.remove('hidden');
+                document.getElementById('clear-all-tx-btn').classList.remove('hidden');
+                document.getElementById('tx-action-header').classList.remove('hidden');
                 renderAdminDashboard();
             } else {
                 document.getElementById('admin-badge').classList.add('hidden');
                 document.getElementById('user-role-badge').innerText = 'حساب مستثمر (عرض فقط)';
                 document.getElementById('admin-controls').classList.add('hidden');
                 document.getElementById('admin-investors-list').classList.add('hidden');
+                document.getElementById('clear-all-tx-btn').classList.add('hidden');
+                document.getElementById('tx-action-header').classList.add('hidden');
                 renderInvestorDashboard();
             }
         }
@@ -304,7 +312,7 @@
                 `;
             });
 
-            renderTransactions(db.transactions);
+            renderTransactions(db.transactions, true);
         }
 
         function renderInvestorDashboard() {
@@ -319,26 +327,63 @@
             document.getElementById('stat-net-profit').innerText = `$${(currentInv.netProfit || 0).toFixed(2)}`;
 
             const userTx = db.transactions.filter(t => t.username === currentInv.username);
-            renderTransactions(userTx);
+            renderTransactions(userTx, false);
         }
 
-        function renderTransactions(txs) {
+        function renderTransactions(txs, isAdmin) {
             const txBody = document.getElementById('transactions-table');
             txBody.innerHTML = '';
             if (txs.length === 0) {
-                txBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-500">لا توجد عمليات مسجلة بعد</td></tr>`;
+                txBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-500">لا توجد عمليات مسجلة بعد</td></tr>`;
                 return;
             }
-            txs.slice().reverse().forEach(t => {
+            txs.slice().reverse().forEach((t, revIndex) => {
+                const originalIndex = txs.length - 1 - revIndex;
+                const deleteBtn = isAdmin ? `<td class="p-3"><button onclick="deleteTransaction(${originalIndex})" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs font-bold">حذف 🗑️</button></td>` : '';
+                
                 txBody.innerHTML += `
                     <tr class="border-b dark:border-gray-700">
                         <td class="p-3">${t.date}</td>
                         <td class="p-3 font-bold ${t.type === 'profit' ? 'text-green-500' : 'text-red-500'}">${t.type === 'profit' ? 'أرباح (+)' : 'خسارة (-)'}</td>
                         <td class="p-3">${t.note || '-'}</td>
                         <td class="p-3 font-semibold">$${Number(t.amount).toFixed(2)}</td>
+                        ${deleteBtn}
                     </tr>
                 `;
             });
+        }
+
+        function deleteTransaction(index) {
+            if (confirm('هل تريد حذف هذه الحركة وتعديل الأرباح؟')) {
+                const db = getDB();
+                const tx = db.transactions[index];
+
+                if (tx) {
+                    if (tx.username === db.admin.username) {
+                        db.admin.adminProfit = Math.max(0, (db.admin.adminProfit || 0) - tx.amount);
+                    } else {
+                        const inv = db.investors.find(i => i.username === tx.username);
+                        if (inv) {
+                            inv.netProfit = (inv.netProfit || 0) - tx.amount;
+                        }
+                    }
+                }
+
+                db.transactions.splice(index, 1);
+                saveDB(db);
+                renderAdminDashboard();
+            }
+        }
+
+        function clearAllTransactions() {
+            if (confirm('⚠️ هل أنت متأكد من مسح جميع الحركات وتصفير أرباح المحفظة بالكامل؟')) {
+                const db = getDB();
+                db.transactions = [];
+                db.admin.adminProfit = 0;
+                db.investors.forEach(i => i.netProfit = 0);
+                saveDB(db);
+                renderAdminDashboard();
+            }
         }
 
         function handleAddInvestor(e) {
@@ -398,7 +443,6 @@
             }
 
             if (type === 'profit') {
-                // Find Managers with Extra Fee
                 let totalAdminCut = 0;
 
                 db.investors.forEach(inv => {
@@ -409,14 +453,12 @@
                     }
                 });
 
-                // Total remaining to split based on capital
                 const remainingProfit = amount - totalAdminCut;
 
                 db.investors.forEach(inv => {
                     const shareRatio = inv.capital / totalCapital;
                     let myProfit = remainingProfit * shareRatio;
 
-                    // If this member is an Admin, add his extra fee cut
                     if (inv.isAdmin && inv.feeRate > 0) {
                         const myCut = amount * (inv.feeRate / 100);
                         myProfit += myCut;
@@ -450,7 +492,7 @@
             }
 
             saveDB(db);
-            alert('تم حفظ ونشر توزيع الأرباح بنجاح! ✔️');
+            alert('تم حفظ ونشر توزيع الأرباح بنجاح! ✔️️');
             e.target.reset();
             renderAdminDashboard();
         }
