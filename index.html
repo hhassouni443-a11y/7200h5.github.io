@@ -69,7 +69,7 @@
             <!-- Stats -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow border-r-4 border-blue-500">
-                    <p class="text-sm text-gray-500">رأس المال الكلي / المساهمة</p>
+                    <p class="text-sm text-gray-500" id="stat-cap-title">رأس المال الكلي / رأس مالك</p>
                     <h3 class="text-2xl font-bold mt-1" id="stat-capital">$0.00</h3>
                 </div>
                 <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow border-r-4 border-green-500">
@@ -177,9 +177,9 @@
                 </div>
             </div>
 
-            <!-- Members List -->
-            <div id="admin-investors-list" class="hidden bg-white dark:bg-gray-800 p-6 rounded-2xl shadow overflow-x-auto border dark:border-gray-700">
-                <h3 class="text-lg font-bold mb-4">👥 الأعضاء والمستثمرون</h3>
+            <!-- Members List (Visible to All with Privacy for Profits) -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow overflow-x-auto border dark:border-gray-700">
+                <h3 class="text-lg font-bold mb-4">👥 الأعضاء والمستثمرون في المنظومة</h3>
                 <table class="w-full text-right border-collapse">
                     <thead>
                         <tr class="border-b dark:border-gray-700 text-gray-500">
@@ -187,9 +187,9 @@
                             <th class="p-3">المستخدم</th>
                             <th class="p-3">رأس المال الحالي</th>
                             <th class="p-3">نسبة المساهمة</th>
-                            <th class="p-3">الصفة والنسبة</th>
-                            <th class="p-3">صافي الأرباح</th>
-                            <th class="p-3">إجراءات</th>
+                            <th class="p-3">الصفة</th>
+                            <th class="p-3" id="table-profit-header">صافي الأرباح</th>
+                            <th class="p-3" id="table-action-header">إجراءات</th>
                         </tr>
                     </thead>
                     <tbody id="investors-table-body"></tbody>
@@ -199,7 +199,7 @@
             <!-- Log -->
             <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow overflow-x-auto border dark:border-gray-700">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold">📜 سجل الحركات المالية والشخصية</h3>
+                    <h3 class="text-lg font-bold">📜 سجل الحركات المالية</h3>
                     <button id="clear-all-tx-btn" onclick="clearAllTransactions()" class="hidden bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white px-3 py-1 rounded-lg text-xs font-bold transition">مسح كل السجل 🗑️</button>
                 </div>
                 <table class="w-full text-right border-collapse">
@@ -286,19 +286,21 @@
                 document.getElementById('admin-badge').classList.remove('hidden');
                 document.getElementById('user-role-badge').innerText = 'مدير النظام (مزامنة سحابية أونلاين)';
                 document.getElementById('admin-controls').classList.remove('hidden');
-                document.getElementById('admin-investors-list').classList.remove('hidden');
                 document.getElementById('clear-all-tx-btn').classList.remove('hidden');
                 document.getElementById('tx-action-header').classList.remove('hidden');
+                document.getElementById('table-action-header').classList.remove('hidden');
+                document.getElementById('table-profit-header').innerText = 'صافي الأرباح';
                 
                 db.collection('investors').onSnapshot(() => renderAdminDashboard());
                 db.collection('transactions').onSnapshot(() => renderAdminDashboard());
             } else {
                 document.getElementById('admin-badge').classList.add('hidden');
-                document.getElementById('user-role-badge').innerText = 'حساب مستثمر (عرض مباشر أونلاين)';
+                document.getElementById('user-role-badge').innerText = 'حساب مستثمر (عرض شفاف للمحفظة)';
                 document.getElementById('admin-controls').classList.add('hidden');
-                document.getElementById('admin-investors-list').classList.add('hidden');
                 document.getElementById('clear-all-tx-btn').classList.add('hidden');
                 document.getElementById('tx-action-header').classList.add('hidden');
+                document.getElementById('table-action-header').classList.add('hidden');
+                document.getElementById('table-profit-header').innerText = 'أرباح المستثمر';
 
                 db.collection('investors').onSnapshot(() => renderInvestorDashboard());
                 db.collection('transactions').onSnapshot(() => renderInvestorDashboard());
@@ -312,6 +314,7 @@
             const totalCapital = investors.reduce((sum, i) => sum + Number(i.capital), 0);
             const adminObj = investors.find(i => i.isAdmin) || { netProfit: 0 };
             
+            document.getElementById('stat-cap-title').innerText = 'رأس المال الكلي';
             document.getElementById('stat-capital').innerText = `$${totalCapital.toFixed(2)}`;
             document.getElementById('stat-share').innerText = `100% (إجمالي)`;
             document.getElementById('stat-net-profit').innerText = `$${(adminObj.netProfit || 0).toFixed(2)}`;
@@ -357,10 +360,35 @@
             const totalCapital = investors.reduce((sum, i) => sum + Number(i.capital), 0);
             const share = totalCapital > 0 ? ((currentInv.capital / totalCapital) * 100).toFixed(2) : '0';
 
+            document.getElementById('stat-cap-title').innerText = 'رأس مالك الحالي';
             document.getElementById('stat-capital').innerText = `$${Number(currentInv.capital).toFixed(2)}`;
             document.getElementById('stat-share').innerText = `${share}%`;
-            document.getElementById('profit-stat-title').innerText = 'صافي أرباحك';
+            document.getElementById('profit-stat-title').innerText = 'صافي أرباحك الخاصة';
             document.getElementById('stat-net-profit').innerText = `$${(currentInv.netProfit || 0).toFixed(2)}`;
+
+            // Render Investors Table for Transparency (Hiding others' private profits)
+            const invBody = document.getElementById('investors-table-body');
+            invBody.innerHTML = '';
+
+            investors.forEach((inv) => {
+                const invShare = totalCapital > 0 ? ((inv.capital / totalCapital) * 100).toFixed(2) : '0';
+                const roleBadge = inv.isAdmin ? `<span class="text-blue-600 dark:text-blue-400 font-bold">✔️ مدير النظام</span>` : `<span class="text-gray-500">مستثمر</span>`;
+                const isMe = inv.username === currentUser.username;
+                
+                // Show profit only for the logged-in investor to maintain privacy
+                const profitDisplay = isMe ? `<span class="text-emerald-600 font-bold">$${(inv.netProfit || 0).toFixed(2)}</span>` : `<span class="text-gray-400 italic">خاص</span>`;
+
+                invBody.innerHTML += `
+                    <tr class="border-b dark:border-gray-700 ${isMe ? 'bg-blue-50/50 dark:bg-gray-700/30' : ''}">
+                        <td class="p-3 font-semibold">${inv.full_name} ${isMe ? '(أنت)' : ''}</td>
+                        <td class="p-3">${inv.username}</td>
+                        <td class="p-3 font-bold text-blue-600 dark:text-blue-400">$${Number(inv.capital).toFixed(2)}</td>
+                        <td class="p-3">${invShare}%</td>
+                        <td class="p-3">${roleBadge}</td>
+                        <td class="p-3">${profitDisplay}</td>
+                    </tr>
+                `;
+            });
 
             const txSnap = await db.collection('transactions').where('username', '==', currentInv.username).get();
             const txs = txSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -374,6 +402,8 @@
                 txBody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-500">لا توجد عمليات مسجلة بعد</td></tr>`;
                 return;
             }
+            txs.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+
             txs.forEach((t) => {
                 const deleteBtn = isAdmin ? `<td class="p-3"><button onclick="deleteTransaction('${t.id}')" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs font-bold">حذف 🗑️</button></td>` : '';
                 
@@ -423,7 +453,7 @@
                 netProfit: 0
             });
 
-            alert('تم الحفظ والنشر سحابياً بنجاح! ✔️');
+            alert('تم الحفظ والنشر سحابياً بنجاح! ✔️️');
             e.target.reset();
             document.getElementById('fee-select-box').classList.add('hidden');
         }
