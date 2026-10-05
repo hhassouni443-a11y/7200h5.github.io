@@ -69,7 +69,7 @@
             <!-- Stats -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow border-r-4 border-blue-500">
-                    <p class="text-sm text-gray-500">رأس المال الكلي</p>
+                    <p class="text-sm text-gray-500">رأس المال الكلي / المساهمة</p>
                     <h3 class="text-2xl font-bold mt-1" id="stat-capital">$0.00</h3>
                 </div>
                 <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow border-r-4 border-green-500">
@@ -83,69 +83,96 @@
             </div>
 
             <!-- Admin Controls -->
-            <div id="admin-controls" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Add Member -->
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow border dark:border-gray-700">
-                    <h3 class="text-lg font-bold mb-4">➕ إضافة عضو / مستثمر جديد</h3>
-                    <form onsubmit="handleAddInvestor(event)" class="space-y-4">
-                        <input type="text" id="inv-fullname" placeholder="الاسم الكامل" required class="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
-                        <input type="text" id="inv-username" placeholder="اسم المستخدم" required class="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
-                        <input type="password" id="inv-password" placeholder="كلمة المرور" required class="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
-                        <input type="number" step="0.01" id="inv-capital" placeholder="رأس المال ($)" required class="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
-                        
-                        <div class="pt-2 border-t dark:border-gray-700 space-y-3">
-                            <div class="flex items-center gap-2 justify-end">
-                                <label for="is-admin-checkbox" class="text-sm font-bold cursor-pointer select-none">
-                                    تعيين كمدير (يستلم النسبة الإضافية)
-                                </label>
-                                <input type="checkbox" id="is-admin-checkbox" onchange="toggleFeeOption()" class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer">
+            <div id="admin-controls" class="hidden space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    
+                    <!-- Add Member -->
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow border dark:border-gray-700">
+                        <h3 class="text-lg font-bold mb-4">➕ إضافة عضو / مستثمر جديد</h3>
+                        <form onsubmit="handleAddInvestor(event)" class="space-y-4">
+                            <input type="text" id="inv-fullname" placeholder="الاسم الكامل" required class="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                            <input type="text" id="inv-username" placeholder="اسم المستخدم" required class="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                            <input type="password" id="inv-password" placeholder="كلمة المرور" required class="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                            <input type="number" step="0.01" id="inv-capital" placeholder="رأس المال الابتدائي ($)" required class="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                            
+                            <div class="pt-2 border-t dark:border-gray-700 space-y-3">
+                                <div class="flex items-center gap-2 justify-end">
+                                    <label for="is-admin-checkbox" class="text-sm font-bold cursor-pointer select-none">
+                                        تعيين كمدير (يستلم النسبة الإضافية)
+                                    </label>
+                                    <input type="checkbox" id="is-admin-checkbox" onchange="toggleFeeOption()" class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer">
+                                </div>
+
+                                <div id="fee-select-box" class="hidden">
+                                    <label class="block text-xs text-gray-500 mb-1">اختر النسبة الإضافية للمدير:</label>
+                                    <select id="admin-fee-rate" class="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 font-bold text-blue-600 dark:text-blue-400">
+                                        <option value="10">10%</option>
+                                        <option value="11">11%</option>
+                                        <option value="12">12%</option>
+                                        <option value="13">13%</option>
+                                        <option value="14">14%</option>
+                                        <option value="15" selected>15%</option>
+                                        <option value="16">16%</option>
+                                        <option value="17">17%</option>
+                                        <option value="18">18%</option>
+                                        <option value="19">19%</option>
+                                        <option value="20">20%</option>
+                                    </select>
+                                </div>
                             </div>
 
-                            <div id="fee-select-box" class="hidden">
-                                <label class="block text-xs text-gray-500 mb-1">اختر النسبة الإضافية للمدير:</label>
-                                <select id="admin-fee-rate" class="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 font-bold text-blue-600 dark:text-blue-400">
-                                    <option value="10">10%</option>
-                                    <option value="11">11%</option>
-                                    <option value="12">12%</option>
-                                    <option value="13">13%</option>
-                                    <option value="14">14%</option>
-                                    <option value="15" selected>15%</option>
-                                    <option value="16">16%</option>
-                                    <option value="17">17%</option>
-                                    <option value="18">18%</option>
-                                    <option value="19">19%</option>
-                                    <option value="20">20%</option>
+                            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl">حفظ ونشر أونلاين</button>
+                        </form>
+                    </div>
+
+                    <!-- Deposit / Withdraw for Investor -->
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow border dark:border-gray-700">
+                        <h3 class="text-lg font-bold mb-4">💳 إيداع / سحب لمستثمر</h3>
+                        <form onsubmit="handleCapitalTransaction(event)" class="space-y-3">
+                            <div>
+                                <label class="block text-xs text-gray-500 mb-1">اختر المستثمر</label>
+                                <select id="cap-investor-select" required class="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                                    <option value="">-- اختر مستثمر --</option>
                                 </select>
                             </div>
-                        </div>
+                            <div>
+                                <label class="block text-xs text-gray-500 mb-1">نوع العملية</label>
+                                <select id="cap-type" class="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                                    <option value="deposit">إيداع (زيادة رأس المال +)</option>
+                                    <option value="withdraw">سحب (تقليل رأس المال -)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-500 mb-1">المبلغ ($)</label>
+                                <input type="number" step="0.01" id="cap-amount" placeholder="المبلغ ($)" required class="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                            </div>
+                            <input type="text" id="cap-note" placeholder="ملاحظات (مثال: إيداع إضافي)" class="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                            
+                            <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 rounded-xl">تنفيذ وتحديث رأس المال 🔄</button>
+                        </form>
+                    </div>
 
-                        <div class="flex gap-2 pt-2">
-                            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl">حفظ ونشر أونلاين</button>
-                        </div>
-                    </form>
-                </div>
+                    <!-- Record Distribution -->
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow border dark:border-gray-700">
+                        <h3 class="text-lg font-bold mb-4">💰 تسجيل وتوزيع الصفقة</h3>
+                        <form onsubmit="handleDistribution(event)" class="space-y-3">
+                            <div>
+                                <label class="block text-xs text-gray-500 mb-1">نوع العملية</label>
+                                <select id="dist-type" class="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                                    <option value="profit">أرباح صفقة (+)</option>
+                                    <option value="loss">خسارة صفقة (-)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-500 mb-1">إجمالي المبلغ ($)</label>
+                                <input type="number" step="0.01" id="dist-amount" placeholder="المبلغ الكلي" required class="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                            </div>
+                            <input type="text" id="dist-note" placeholder="اسم الصفقة / ملاحظات" class="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                            
+                            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl mt-4">حفظ ونشر التوزيع أونلاين</button>
+                        </form>
+                    </div>
 
-                <!-- Record Distribution -->
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow border dark:border-gray-700">
-                    <h3 class="text-lg font-bold mb-4">💰 تسجيل وتوزيع الصفقة</h3>
-                    <form onsubmit="handleDistribution(event)" class="space-y-3">
-                        <div>
-                            <label class="block text-xs text-gray-500 mb-1">نوع العملية</label>
-                            <select id="dist-type" class="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
-                                <option value="profit">أرباح صفقة (+)</option>
-                                <option value="loss">خسارة صفقة (-)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs text-gray-500 mb-1">إجمالي المبلغ ($)</label>
-                            <input type="number" step="0.01" id="dist-amount" placeholder="المبلغ الكلي" required class="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
-                        </div>
-                        <input type="text" id="dist-note" placeholder="اسم الصفقة / ملاحظات" class="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
-                        
-                        <div class="flex gap-2 pt-4">
-                            <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl">حفظ ونشر التوزيع أونلاين</button>
-                        </div>
-                    </form>
                 </div>
             </div>
 
@@ -157,10 +184,10 @@
                         <tr class="border-b dark:border-gray-700 text-gray-500">
                             <th class="p-3">الاسم</th>
                             <th class="p-3">المستخدم</th>
-                            <th class="p-3">رأس المال</th>
+                            <th class="p-3">رأس المال الحالي</th>
                             <th class="p-3">نسبة المساهمة</th>
-                            <th class="p-3">الصفة والنسبة الإضافية</th>
-                            <th class="p-3">الأرباح</th>
+                            <th class="p-3">الصفة والنسبة</th>
+                            <th class="p-3">صافي الأرباح</th>
                             <th class="p-3">إجراءات</th>
                         </tr>
                     </thead>
@@ -171,13 +198,14 @@
             <!-- Log -->
             <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow overflow-x-auto border dark:border-gray-700">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold">📜 سجل الحركات المالية</h3>
+                    <h3 class="text-lg font-bold">📜 سجل الحركات المالية والشخصية</h3>
                     <button id="clear-all-tx-btn" onclick="clearAllTransactions()" class="hidden bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white px-3 py-1 rounded-lg text-xs font-bold transition">مسح كل السجل 🗑️</button>
                 </div>
                 <table class="w-full text-right border-collapse">
                     <thead>
                         <tr class="border-b dark:border-gray-700 text-gray-500">
                             <th class="p-3">التاريخ</th>
+                            <th class="p-3">المستثمر</th>
                             <th class="p-3">النوع</th>
                             <th class="p-3">التفاصيل</th>
                             <th class="p-3">المبلغ</th>
@@ -192,7 +220,6 @@
     </main>
 
     <script>
-        // مفاتيح مشروعك المربوطة سحابياً:
         const firebaseConfig = {
             apiKey: "AIzaSyB6ppmQ6ZwIaQF_x0uIwzixK",
             authDomain: "earnings-608d5.firebaseapp.com",
@@ -288,6 +315,13 @@
             document.getElementById('stat-share').innerText = `100% (إجمالي)`;
             document.getElementById('stat-net-profit').innerText = `$${(adminObj.netProfit || 0).toFixed(2)}`;
 
+            // Populate Investor Dropdown for Capital Transaction
+            const selectBox = document.getElementById('cap-investor-select');
+            selectBox.innerHTML = '<option value="">-- اختر مستثمر --</option>';
+            investors.forEach(inv => {
+                selectBox.innerHTML += `<option value="${inv.id}">${inv.full_name} (${inv.username})</option>`;
+            });
+
             const invBody = document.getElementById('investors-table-body');
             invBody.innerHTML = '';
 
@@ -299,7 +333,7 @@
                     <tr class="border-b dark:border-gray-700">
                         <td class="p-3 font-semibold">${inv.full_name}</td>
                         <td class="p-3">${inv.username}</td>
-                        <td class="p-3">$${Number(inv.capital).toFixed(2)}</td>
+                        <td class="p-3 font-bold text-blue-600 dark:text-blue-400">$${Number(inv.capital).toFixed(2)}</td>
                         <td class="p-3">${share}%</td>
                         <td class="p-3">${roleBadge}</td>
                         <td class="p-3 ${inv.netProfit >= 0 ? 'text-green-500' : 'text-red-500'} font-bold">$${(inv.netProfit || 0).toFixed(2)}</td>
@@ -337,16 +371,24 @@
             const txBody = document.getElementById('transactions-table');
             txBody.innerHTML = '';
             if (txs.length === 0) {
-                txBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-500">لا توجد عمليات مسجلة بعد</td></tr>`;
+                txBody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-500">لا توجد عمليات مسجلة بعد</td></tr>`;
                 return;
             }
             txs.forEach((t) => {
-                const deleteBtn = isAdmin ? `<td class="p-3"><button onclick="deleteTransaction('${t.id}', '${t.username}', ${t.amount})" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs font-bold">حذف 🗑️</button></td>` : '';
+                const deleteBtn = isAdmin ? `<td class="p-3"><button onclick="deleteTransaction('${t.id}')" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs font-bold">حذف 🗑️</button></td>` : '';
                 
+                let typeBadge = '';
+                let colorClass = '';
+                if(t.type === 'profit') { typeBadge = 'أرباح (+)'; colorClass = 'text-green-500'; }
+                else if(t.type === 'loss') { typeBadge = 'خسارة (-)'; colorClass = 'text-red-500'; }
+                else if(t.type === 'deposit') { typeBadge = 'إيداع لرأس المال (+)'; colorClass = 'text-purple-500'; }
+                else if(t.type === 'withdraw') { typeBadge = 'سحب من رأس المال (-)'; colorClass = 'text-orange-500'; }
+
                 txBody.innerHTML += `
                     <tr class="border-b dark:border-gray-700">
                         <td class="p-3">${t.date}</td>
-                        <td class="p-3 font-bold ${t.type === 'profit' ? 'text-green-500' : 'text-red-500'}">${t.type === 'profit' ? 'أرباح (+)' : 'خسارة (-)'}</td>
+                        <td class="p-3 font-semibold">${t.full_name || t.username || 'الكل'}</td>
+                        <td class="p-3 font-bold ${colorClass}">${typeBadge}</td>
                         <td class="p-3">${t.note || '-'}</td>
                         <td class="p-3 font-semibold">$${Number(t.amount).toFixed(2)}</td>
                         ${deleteBtn}
@@ -385,32 +427,62 @@
             document.getElementById('fee-select-box').classList.add('hidden');
         }
 
+        async function handleCapitalTransaction(e) {
+            e.preventDefault();
+            const invId = document.getElementById('cap-investor-select').value;
+            const type = document.getElementById('cap-type').value;
+            const amount = parseFloat(document.getElementById('cap-amount').value);
+            const note = document.getElementById('cap-note').value;
+            const date = new Date().toLocaleDateString('ar-EG');
+
+            if(!invId) { alert('يرجى اختيار مستثمر أولاً!'); return; }
+
+            const invDoc = await db.collection('investors').doc(invId).get();
+            if(!invDoc.exists) return;
+            const invData = invDoc.data();
+
+            const changeAmount = type === 'deposit' ? amount : -amount;
+
+            if (type === 'withdraw' && invData.capital < amount) {
+                if(!confirm('تنبيه: المبلغ المسحوب أكبر من رأس مال المستثمر الحالي! هل ترغب بالمتابعة؟')) return;
+            }
+
+            // Update capital
+            await db.collection('investors').doc(invId).update({
+                capital: firebase.firestore.FieldValue.increment(changeAmount)
+            });
+
+            // Add to transaction log
+            await db.collection('transactions').add({
+                username: invData.username,
+                full_name: invData.full_name,
+                type: type,
+                amount: changeAmount,
+                note: note,
+                date: date,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            alert('تم تحديث رأس المال والسجل أونلاين بنجاح! 💳✔️');
+            e.target.reset();
+        }
+
         async function deleteInvestor(id) {
             if (confirm('تأكد تحذف هذا المستثمر أونلاين؟')) {
                 await db.collection('investors').doc(id).delete();
             }
         }
 
-        async function deleteTransaction(txId, username, amount) {
+        async function deleteTransaction(txId) {
             if (confirm('تأكد تحذف هذه الحركة أونلاين؟')) {
                 await db.collection('transactions').doc(txId).delete();
-                const invSnap = await db.collection('investors').where('username', '==', username).get();
-                if (!invSnap.empty) {
-                    const doc = invSnap.docs[0];
-                    await db.collection('investors').doc(doc.id).update({
-                        netProfit: firebase.firestore.FieldValue.increment(-amount)
-                    });
-                }
             }
         }
 
         async function clearAllTransactions() {
-            if (confirm('⚠️ مسح السجل وتصفير كل الأرباح سحابياً؟')) {
+            if (confirm('⚠️ مسح السجل كاملاً سحابياً؟')) {
                 const txs = await db.collection('transactions').get();
                 txs.forEach(doc => doc.ref.delete());
-
-                const invs = await db.collection('investors').get();
-                invs.forEach(doc => doc.ref.update({ netProfit: 0 }));
             }
         }
 
@@ -427,7 +499,7 @@
             const totalCapital = investors.reduce((sum, i) => sum + Number(i.capital), 0);
 
             if (totalCapital === 0) {
-                alert('لا يوجد أعضاء لحساب التوزيع عليهم!');
+                alert('لا يوجد أعضاء أو رأس مال لحساب التوزيع عليهم!');
                 return;
             }
 
@@ -455,6 +527,7 @@
 
                     await db.collection('transactions').add({
                         username: inv.username,
+                        full_name: inv.full_name,
                         type: 'profit',
                         amount: myProfit,
                         note: inv.isAdmin ? `${note} (تتضمن النسبة الإضافية للمدير ✔️)` : note,
@@ -473,6 +546,7 @@
 
                     await db.collection('transactions').add({
                         username: inv.username,
+                        full_name: inv.full_name,
                         type: 'loss',
                         amount: -lossAmount,
                         note: note,
