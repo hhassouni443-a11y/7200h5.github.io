@@ -20,6 +20,7 @@
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100 min-h-screen font-sans">
 
+    <!-- Navbar -->
     <nav class="bg-white dark:bg-gray-800 shadow border-b dark:border-gray-700">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
             <span class="text-2xl font-bold text-brand-600 dark:text-brand-500">📈 محفظة الشراكة</span>
@@ -30,9 +31,10 @@
         </div>
     </nav>
 
+    <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 py-8">
 
-        <!-- Login Section -->
+        <!-- Login Form -->
         <div id="login-section" class="max-w-md mx-auto bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg border dark:border-gray-700">
             <h2 class="text-2xl font-bold text-center mb-6">تسجيل الدخول للمنظومة</h2>
             <form onsubmit="handleLogin(event)" class="space-y-4">
@@ -44,19 +46,19 @@
                     <label class="block text-sm font-medium mb-1">كلمة المرور</label>
                     <input type="password" id="login-password" required class="w-full px-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600">
                 </div>
-                <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-2 rounded-lg">دخول</button>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg">دخول</button>
                 <p id="login-error" class="text-red-500 text-sm text-center hidden"></p>
             </form>
         </div>
 
-        <!-- Dashboard Section -->
+        <!-- Dashboard -->
         <div id="dashboard-section" class="hidden space-y-6">
             
             <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow flex justify-between items-center border dark:border-gray-700">
                 <div>
                     <h1 class="text-2xl font-bold flex items-center gap-2">
                         <span id="user-display-name"></span>
-                        <span id="admin-badge" class="hidden bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded border border-blue-400">✔️ مسؤول المحفظة</span>
+                        <span id="admin-badge" class="hidden bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded border border-blue-400">✔️ مدير المحفظة</span>
                     </h1>
                     <p class="text-sm text-gray-500 mt-1" id="user-role-badge"></p>
                 </div>
@@ -73,53 +75,83 @@
                     <h3 class="text-2xl font-bold mt-1" id="stat-share">0%</h3>
                 </div>
                 <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow border-r-4 border-emerald-500">
-                    <p class="text-sm text-gray-500" id="profit-stat-title">صافي أرباح المسؤول (النسبة الإضافية ✔️)</p>
+                    <p class="text-sm text-gray-500" id="profit-stat-title">الأرباح المسجلة / النسبة الإضافية</p>
                     <h3 class="text-2xl font-bold mt-1 text-emerald-600 dark:text-emerald-400" id="stat-net-profit">$0.00</h3>
                 </div>
             </div>
 
-            <!-- Admin Action Panel -->
+            <!-- Admin Controls -->
             <div id="admin-controls" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Add Investor -->
+                <!-- Add Member / Investor -->
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow border dark:border-gray-700">
-                    <h3 class="text-lg font-bold mb-4">➕ إضافة مستثمر جديد</h3>
-                    <form onsubmit="handleAddInvestor(event)" class="space-y-3">
-                        <input type="text" id="inv-fullname" placeholder="الاسم الكامل" required class="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
-                        <input type="text" id="inv-username" placeholder="اسم المستخدم" required class="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
-                        <input type="password" id="inv-password" placeholder="كلمة المرور" required class="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
-                        <input type="number" step="0.01" id="inv-capital" placeholder="رأس المال ($)" required class="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
-                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg">إضافة وتثبيت المستثمر</button>
+                    <h3 class="text-lg font-bold mb-4">➕ إضافة عضو / مستثمر جديد</h3>
+                    <form onsubmit="handleAddInvestor(event)" class="space-y-4">
+                        <input type="text" id="inv-fullname" placeholder="الاسم الكامل" required class="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                        <input type="text" id="inv-username" placeholder="اسم المستخدم" required class="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                        <input type="password" id="inv-password" placeholder="كلمة المرور" required class="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                        <input type="number" step="0.01" id="inv-capital" placeholder="رأس المال ($)" required class="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                        
+                        <!-- Checkbox & Ratio Option -->
+                        <div class="pt-2 border-t dark:border-gray-700 space-y-3">
+                            <div class="flex items-center gap-2 justify-end">
+                                <label for="is-admin-checkbox" class="text-sm font-bold cursor-pointer select-none">
+                                    تعيين كمدير (يستلم النسبة الإضافية)
+                                </label>
+                                <input type="checkbox" id="is-admin-checkbox" onchange="toggleFeeOption()" class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer">
+                            </div>
+
+                            <div id="fee-select-box" class="hidden">
+                                <label class="block text-xs text-gray-500 mb-1">اختر النسبة الإضافية للمدير:</label>
+                                <select id="admin-fee-rate" class="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 font-bold text-blue-600 dark:text-blue-400">
+                                    <option value="10">10%</option>
+                                    <option value="11">11%</option>
+                                    <option value="12">12%</option>
+                                    <option value="13">13%</option>
+                                    <option value="14">14%</option>
+                                    <option value="15" selected>15%</option>
+                                    <option value="16">16%</option>
+                                    <option value="17">17%</option>
+                                    <option value="18">18%</option>
+                                    <option value="19">19%</option>
+                                    <option value="20">20%</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2 pt-2">
+                            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition duration-150">حفظ ونشر</button>
+                            <button type="reset" onclick="document.getElementById('fee-select-box').classList.add('hidden')" class="px-4 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-bold py-2.5 rounded-xl">إلغاء</button>
+                        </div>
                     </form>
                 </div>
 
-                <!-- Record Profit and Admin Fee -->
+                <!-- Record Distribution -->
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow border dark:border-gray-700">
-                    <h3 class="text-lg font-bold mb-4">💰 إضافة أرباح ونسبة المسؤول الإضافية</h3>
+                    <h3 class="text-lg font-bold mb-4">💰 تسجيل وتوزيع الصفقة</h3>
                     <form onsubmit="handleDistribution(event)" class="space-y-3">
                         <div>
                             <label class="block text-xs text-gray-500 mb-1">نوع العملية</label>
-                            <select id="dist-type" class="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                            <select id="dist-type" class="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
                                 <option value="profit">أرباح صفقة (+)</option>
-                                <option value="loss">خسارة (-)</option>
+                                <option value="loss">خسارة صفقة (-)</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs text-gray-500 mb-1">المبلغ الكلي ($)</label>
-                            <input type="number" step="0.01" id="dist-amount" placeholder="مثال: 500" required class="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                            <label class="block text-xs text-gray-500 mb-1">إجمالي المبلغ ($)</label>
+                            <input type="number" step="0.01" id="dist-amount" placeholder="المبلغ الكلي" required class="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
                         </div>
-                        <div>
-                            <label class="block text-xs font-bold text-blue-600 dark:text-blue-400 mb-1">نسبة أرباح المسؤول الإضافية (10% إلى 20%) ✔️</label>
-                            <input type="number" step="1" min="0" max="100" id="dist-fee" value="15" placeholder="أدخل النسبة (مثلاً 15)" class="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 font-bold">
+                        <input type="text" id="dist-note" placeholder="اسم الصفقة / ملاحظات" class="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                        
+                        <div class="flex gap-2 pt-4">
+                            <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl">حفظ ونشر التوزيع</button>
                         </div>
-                        <input type="text" id="dist-note" placeholder="اسم الصفقة / ملاحظة" class="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
-                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg">تأكيد وتحويل نسبة المسؤول وإضافة الباقي</button>
                     </form>
                 </div>
             </div>
 
-            <!-- Investors Table -->
+            <!-- Members List -->
             <div id="admin-investors-list" class="hidden bg-white dark:bg-gray-800 p-6 rounded-2xl shadow overflow-x-auto border dark:border-gray-700">
-                <h3 class="text-lg font-bold mb-4">👥 قائمة أعضاء المحفظة والمستثمرين</h3>
+                <h3 class="text-lg font-bold mb-4">👥 الأعضاء والمستثمرون</h3>
                 <table class="w-full text-right border-collapse">
                     <thead>
                         <tr class="border-b dark:border-gray-700 text-gray-500">
@@ -127,8 +159,9 @@
                             <th class="p-3">المستخدم</th>
                             <th class="p-3">رأس المال</th>
                             <th class="p-3">نسبة المساهمة</th>
-                            <th class="p-3">الربح المسجل</th>
-                            <th class="p-3">حذف</th>
+                            <th class="p-3">الصفة والنسبة الإضافية</th>
+                            <th class="p-3">الأرباح</th>
+                            <th class="p-3">إجراءات</th>
                         </tr>
                     </thead>
                     <tbody id="investors-table-body"></tbody>
@@ -137,7 +170,7 @@
 
             <!-- Log -->
             <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow overflow-x-auto border dark:border-gray-700">
-                <h3 class="text-lg font-bold mb-4">📜 سجل الأرباح والحركات</h3>
+                <h3 class="text-lg font-bold mb-4">📜 سجل الحركات المالية</h3>
                 <table class="w-full text-right border-collapse">
                     <thead>
                         <tr class="border-b dark:border-gray-700 text-gray-500">
@@ -161,7 +194,7 @@
             const data = localStorage.getItem(DB_KEY);
             if (!data) {
                 const initialDB = {
-                    admin: { username: 'admin', password: 'admin123', full_name: 'مسؤول المحفظة الرئيسي', adminProfit: 0 },
+                    admin: { username: 'admin', password: 'admin123', full_name: 'مدير المحفظة الرئيسي', adminProfit: 0 },
                     investors: [],
                     transactions: []
                 };
@@ -181,6 +214,16 @@
             document.documentElement.classList.toggle('dark');
         }
 
+        function toggleFeeOption() {
+            const chk = document.getElementById('is-admin-checkbox');
+            const box = document.getElementById('fee-select-box');
+            if (chk.checked) {
+                box.classList.remove('hidden');
+            } else {
+                box.classList.add('hidden');
+            }
+        }
+
         function handleLogin(e) {
             e.preventDefault();
             const u = document.getElementById('login-username').value.trim();
@@ -196,7 +239,7 @@
                     currentUser = { role: 'investor', ...inv };
                     showDashboard();
                 } else {
-                    document.getElementById('login-error').innerText = 'خطأ ببيانات الدخول!';
+                    document.getElementById('login-error').innerText = 'اسم المستخدم أو كلمة المرور غير صحيحة!';
                     document.getElementById('login-error').classList.remove('hidden');
                 }
             }
@@ -218,7 +261,7 @@
 
             if (currentUser.role === 'admin') {
                 document.getElementById('admin-badge').classList.remove('hidden');
-                document.getElementById('user-role-badge').innerText = 'صلاحيات كاملة - إدارة المحفظة والأرباح الإضافية';
+                document.getElementById('user-role-badge').innerText = 'مدير النظام (تحكم كامل)';
                 document.getElementById('admin-controls').classList.remove('hidden');
                 document.getElementById('admin-investors-list').classList.remove('hidden');
                 renderAdminDashboard();
@@ -236,35 +279,26 @@
             const totalCapital = db.investors.reduce((sum, i) => sum + Number(i.capital), 0);
 
             document.getElementById('stat-capital').innerText = `$${totalCapital.toFixed(2)}`;
-            document.getElementById('stat-share').innerText = `100% (إجمالي المحفظة)`;
+            document.getElementById('stat-share').innerText = `100% (إجمالي)`;
             document.getElementById('stat-net-profit').innerText = `$${(db.admin.adminProfit || 0).toFixed(2)}`;
 
             const invBody = document.getElementById('investors-table-body');
             invBody.innerHTML = '';
-            
-            // Show Admin first with checkmark
-            invBody.innerHTML += `
-                <tr class="border-b dark:border-gray-700 bg-blue-50/50 dark:bg-blue-900/20 font-bold">
-                    <td class="p-3 text-blue-600 dark:text-blue-400">✔️ ${db.admin.full_name} (المسؤول)</td>
-                    <td class="p-3">${db.admin.username}</td>
-                    <td class="p-3">-</td>
-                    <td class="p-3">-</td>
-                    <td class="p-3 text-emerald-600">$${(db.admin.adminProfit || 0).toFixed(2)} (نسبة إضافية)</td>
-                    <td class="p-3 text-xs text-gray-400">أساسي</td>
-                </tr>
-            `;
 
             db.investors.forEach((inv, index) => {
                 const share = totalCapital > 0 ? ((inv.capital / totalCapital) * 100).toFixed(2) : '0';
+                const roleBadge = inv.isAdmin ? `<span class="text-blue-600 dark:text-blue-400 font-bold">✔️ مدير (${inv.feeRate}%)</span>` : `<span class="text-gray-500">مستثمر عادي</span>`;
+                
                 invBody.innerHTML += `
                     <tr class="border-b dark:border-gray-700">
-                        <td class="p-3">${inv.full_name}</td>
+                        <td class="p-3 font-semibold">${inv.full_name}</td>
                         <td class="p-3">${inv.username}</td>
                         <td class="p-3">$${Number(inv.capital).toFixed(2)}</td>
                         <td class="p-3">${share}%</td>
-                        <td class="p-3 ${inv.netProfit >= 0 ? 'text-green-500' : 'text-red-500'}">$${(inv.netProfit || 0).toFixed(2)}</td>
+                        <td class="p-3">${roleBadge}</td>
+                        <td class="p-3 ${inv.netProfit >= 0 ? 'text-green-500' : 'text-red-500'} font-bold">$${(inv.netProfit || 0).toFixed(2)}</td>
                         <td class="p-3">
-                            <button onclick="deleteInvestor(${index})" class="bg-red-500 text-white px-2 py-1 rounded text-xs">حذف</button>
+                            <button onclick="deleteInvestor(${index})" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs font-bold">حذف</button>
                         </td>
                     </tr>
                 `;
@@ -314,21 +348,33 @@
             const username = document.getElementById('inv-username').value.trim();
             const password = document.getElementById('inv-password').value.trim();
             const capital = parseFloat(document.getElementById('inv-capital').value);
+            const isAdmin = document.getElementById('is-admin-checkbox').checked;
+            const feeRate = isAdmin ? parseFloat(document.getElementById('admin-fee-rate').value) : 0;
 
             if (db.investors.some(i => i.username === username)) {
-                alert('اسم المستخدم هذا مكرر، اختار اسم ثاني!');
+                alert('اسم المستخدم هذا موجود مسبقاً!');
                 return;
             }
 
-            db.investors.push({ full_name: name, username: username, password: password, capital: capital, netProfit: 0 });
+            db.investors.push({
+                full_name: name,
+                username: username,
+                password: password,
+                capital: capital,
+                isAdmin: isAdmin,
+                feeRate: feeRate,
+                netProfit: 0
+            });
+
             saveDB(db);
-            alert('تمت إضافة المستثمر بنجاح!');
+            alert('تم الحفظ والنشر بنجاح! ✔️');
             e.target.reset();
+            document.getElementById('fee-select-box').classList.add('hidden');
             renderAdminDashboard();
         }
 
         function deleteInvestor(index) {
-            if (confirm('تأكد تحذف هذا المستثمر؟')) {
+            if (confirm('هل أنت تأكد من الحذف؟')) {
                 const db = getDB();
                 db.investors.splice(index, 1);
                 saveDB(db);
@@ -341,62 +387,70 @@
             const db = getDB();
             const type = document.getElementById('dist-type').value;
             const amount = parseFloat(document.getElementById('dist-amount').value);
-            const feePercent = parseFloat(document.getElementById('dist-fee').value) || 0;
             const note = document.getElementById('dist-note').value;
             const date = new Date().toLocaleDateString('ar-EG');
 
             const totalCapital = db.investors.reduce((sum, i) => sum + Number(i.capital), 0);
 
+            if (totalCapital === 0) {
+                alert('لا يوجد أعضاء في المحفظة لحساب الصفقة عليهم!');
+                return;
+            }
+
             if (type === 'profit') {
-                // 1. Calculate Admin Cut
-                const adminCut = amount * (feePercent / 100);
-                db.admin.adminProfit = (db.admin.adminProfit || 0) + adminCut;
+                // Find Managers with Extra Fee
+                let totalAdminCut = 0;
 
-                // 2. Distribute remaining to investors
-                const remaining = amount - adminCut;
+                db.investors.forEach(inv => {
+                    let adminCutForThisInv = 0;
+                    if (inv.isAdmin && inv.feeRate > 0) {
+                        adminCutForThisInv = amount * (inv.feeRate / 100);
+                        totalAdminCut += adminCutForThisInv;
+                    }
+                });
 
-                if (totalCapital > 0) {
-                    db.investors.forEach(inv => {
-                        const invShare = remaining * (inv.capital / totalCapital);
-                        inv.netProfit = (inv.netProfit || 0) + invShare;
+                // Total remaining to split based on capital
+                const remainingProfit = amount - totalAdminCut;
 
-                        db.transactions.push({
-                            username: inv.username,
-                            type: 'profit',
-                            amount: invShare,
-                            note: `${note} (تم اقتطاع ${feePercent}% أرباح المسؤول المسؤول ✔️)`,
-                            date: date
-                        });
+                db.investors.forEach(inv => {
+                    const shareRatio = inv.capital / totalCapital;
+                    let myProfit = remainingProfit * shareRatio;
+
+                    // If this member is an Admin, add his extra fee cut
+                    if (inv.isAdmin && inv.feeRate > 0) {
+                        const myCut = amount * (inv.feeRate / 100);
+                        myProfit += myCut;
+                    }
+
+                    inv.netProfit = (inv.netProfit || 0) + myProfit;
+
+                    db.transactions.push({
+                        username: inv.username,
+                        type: 'profit',
+                        amount: myProfit,
+                        note: inv.isAdmin ? `${note} (تتضمن النسبة الإضافية للمدير ✔️)` : note,
+                        date: date
                     });
-                }
-
-                db.transactions.push({
-                    username: db.admin.username,
-                    type: 'profit',
-                    amount: adminCut,
-                    note: `نسبة أرباح إضافية للمسؤول (${feePercent}%) - ${note}`,
-                    date: date
                 });
 
             } else {
-                if (totalCapital > 0) {
-                    db.investors.forEach(inv => {
-                        const invLoss = amount * (inv.capital / totalCapital);
-                        inv.netProfit = (inv.netProfit || 0) - invLoss;
+                db.investors.forEach(inv => {
+                    const shareRatio = inv.capital / totalCapital;
+                    const lossAmount = amount * shareRatio;
+                    inv.netProfit = (inv.netProfit || 0) - lossAmount;
 
-                        db.transactions.push({
-                            username: inv.username,
-                            type: 'loss',
-                            amount: -invLoss,
-                            note: note,
-                            date: date
-                        });
+                    db.transactions.push({
+                        username: inv.username,
+                        type: 'loss',
+                        amount: -lossAmount,
+                        note: note,
+                        date: date
                     });
-                }
+                });
             }
 
             saveDB(db);
-            alert(`تم إضافة نسبة المسؤول (${feePercent}%) وتوزيع باقي الأرباح بنجاح!`);
+            alert('تم حفظ ونشر توزيع الأرباح بنجاح! ✔️');
             e.target.reset();
             renderAdminDashboard();
         }
