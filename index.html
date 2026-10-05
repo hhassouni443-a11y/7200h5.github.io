@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>منظومة إدارة شراكة التداول</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -23,7 +26,7 @@
     <!-- Navbar -->
     <nav class="bg-white dark:bg-gray-800 shadow border-b dark:border-gray-700">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <span class="text-2xl font-bold text-brand-600 dark:text-brand-500">📈 محفظة الشراكة</span>
+            <span class="text-2xl font-bold text-brand-600 dark:text-brand-500">📈 محفظة الشراكة (مزامنة أونلاين)</span>
             <div class="flex items-center gap-3">
                 <button onclick="toggleDarkMode()" class="p-2 bg-gray-200 dark:bg-gray-700 rounded-lg">☀️ / 🌙</button>
                 <button id="logout-btn" onclick="logout()" class="hidden bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-bold">خروج</button>
@@ -31,10 +34,9 @@
         </div>
     </nav>
 
-    <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 py-8">
 
-        <!-- Login Form -->
+        <!-- Login Section -->
         <div id="login-section" class="max-w-md mx-auto bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg border dark:border-gray-700">
             <h2 class="text-2xl font-bold text-center mb-6">تسجيل الدخول للمنظومة</h2>
             <form onsubmit="handleLogin(event)" class="space-y-4">
@@ -51,7 +53,7 @@
             </form>
         </div>
 
-        <!-- Dashboard -->
+        <!-- Dashboard Section -->
         <div id="dashboard-section" class="hidden space-y-6">
             
             <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow flex justify-between items-center border dark:border-gray-700">
@@ -82,7 +84,7 @@
 
             <!-- Admin Controls -->
             <div id="admin-controls" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Add Member / Investor -->
+                <!-- Add Member -->
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow border dark:border-gray-700">
                     <h3 class="text-lg font-bold mb-4">➕ إضافة عضو / مستثمر جديد</h3>
                     <form onsubmit="handleAddInvestor(event)" class="space-y-4">
@@ -91,7 +93,6 @@
                         <input type="password" id="inv-password" placeholder="كلمة المرور" required class="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
                         <input type="number" step="0.01" id="inv-capital" placeholder="رأس المال ($)" required class="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
                         
-                        <!-- Checkbox & Ratio Option -->
                         <div class="pt-2 border-t dark:border-gray-700 space-y-3">
                             <div class="flex items-center gap-2 justify-end">
                                 <label for="is-admin-checkbox" class="text-sm font-bold cursor-pointer select-none">
@@ -119,8 +120,7 @@
                         </div>
 
                         <div class="flex gap-2 pt-2">
-                            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition duration-150">حفظ ونشر</button>
-                            <button type="reset" onclick="document.getElementById('fee-select-box').classList.add('hidden')" class="px-4 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-bold py-2.5 rounded-xl">إلغاء</button>
+                            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl">حفظ ونشر أونلاين</button>
                         </div>
                     </form>
                 </div>
@@ -143,7 +143,7 @@
                         <input type="text" id="dist-note" placeholder="اسم الصفقة / ملاحظات" class="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
                         
                         <div class="flex gap-2 pt-4">
-                            <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl">حفظ ونشر التوزيع</button>
+                            <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl">حفظ ونشر التوزيع أونلاين</button>
                         </div>
                     </form>
                 </div>
@@ -192,25 +192,18 @@
     </main>
 
     <script>
-        const DB_KEY = 'trading_portfolio_db';
+        // مفاتيح مشروعك المربوطة سحابياً:
+        const firebaseConfig = {
+            apiKey: "AIzaSyB6ppmQ6ZwIaQF_x0uIwzixK",
+            authDomain: "earnings-608d5.firebaseapp.com",
+            projectId: "earnings-608d5",
+            storageBucket: "earnings-608d5.firebasestorage.app",
+            messagingSenderId: "480634480570",
+            appId: "1:480634480570:web:52def0fdd12"
+        };
 
-        function getDB() {
-            const data = localStorage.getItem(DB_KEY);
-            if (!data) {
-                const initialDB = {
-                    admin: { username: 'admin', password: 'admin123', full_name: 'مدير المحفظة الرئيسي', adminProfit: 0 },
-                    investors: [],
-                    transactions: []
-                };
-                localStorage.setItem(DB_KEY, JSON.stringify(initialDB));
-                return initialDB;
-            }
-            return JSON.parse(data);
-        }
-
-        function saveDB(db) {
-            localStorage.setItem(DB_KEY, JSON.stringify(db));
-        }
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
         let currentUser = null;
 
@@ -221,31 +214,29 @@
         function toggleFeeOption() {
             const chk = document.getElementById('is-admin-checkbox');
             const box = document.getElementById('fee-select-box');
-            if (chk.checked) {
-                box.classList.remove('hidden');
-            } else {
-                box.classList.add('hidden');
-            }
+            if (chk.checked) box.classList.remove('hidden');
+            else box.classList.add('hidden');
         }
 
-        function handleLogin(e) {
+        async function handleLogin(e) {
             e.preventDefault();
             const u = document.getElementById('login-username').value.trim();
             const p = document.getElementById('login-password').value.trim();
-            const db = getDB();
 
-            if (u === db.admin.username && p === db.admin.password) {
-                currentUser = { role: 'admin', ...db.admin };
+            if (u === 'admin' && p === 'admin123') {
+                currentUser = { role: 'admin', full_name: 'مدير المحفظة الرئيسي', username: 'admin' };
+                showDashboard();
+                return;
+            }
+
+            const invSnap = await db.collection('investors').where('username', '==', u).where('password', '==', p).get();
+            if (!invSnap.empty) {
+                const invData = invSnap.docs[0].data();
+                currentUser = { role: 'investor', id: invSnap.docs[0].id, ...invData };
                 showDashboard();
             } else {
-                const inv = db.investors.find(i => i.username === u && i.password === p);
-                if (inv) {
-                    currentUser = { role: 'investor', ...inv };
-                    showDashboard();
-                } else {
-                    document.getElementById('login-error').innerText = 'اسم المستخدم أو كلمة المرور غير صحيحة!';
-                    document.getElementById('login-error').classList.remove('hidden');
-                }
+                document.getElementById('login-error').innerText = 'اسم المستخدم أو كلمة المرور غير صحيحة!';
+                document.getElementById('login-error').classList.remove('hidden');
             }
         }
 
@@ -265,35 +256,42 @@
 
             if (currentUser.role === 'admin') {
                 document.getElementById('admin-badge').classList.remove('hidden');
-                document.getElementById('user-role-badge').innerText = 'مدير النظام (تحكم كامل)';
+                document.getElementById('user-role-badge').innerText = 'مدير النظام (مزامنة سحابية أونلاين)';
                 document.getElementById('admin-controls').classList.remove('hidden');
                 document.getElementById('admin-investors-list').classList.remove('hidden');
                 document.getElementById('clear-all-tx-btn').classList.remove('hidden');
                 document.getElementById('tx-action-header').classList.remove('hidden');
-                renderAdminDashboard();
+                
+                db.collection('investors').onSnapshot(() => renderAdminDashboard());
+                db.collection('transactions').onSnapshot(() => renderAdminDashboard());
             } else {
                 document.getElementById('admin-badge').classList.add('hidden');
-                document.getElementById('user-role-badge').innerText = 'حساب مستثمر (عرض فقط)';
+                document.getElementById('user-role-badge').innerText = 'حساب مستثمر (عرض مباشر أونلاين)';
                 document.getElementById('admin-controls').classList.add('hidden');
                 document.getElementById('admin-investors-list').classList.add('hidden');
                 document.getElementById('clear-all-tx-btn').classList.add('hidden');
                 document.getElementById('tx-action-header').classList.add('hidden');
-                renderInvestorDashboard();
+
+                db.collection('investors').onSnapshot(() => renderInvestorDashboard());
+                db.collection('transactions').onSnapshot(() => renderInvestorDashboard());
             }
         }
 
-        function renderAdminDashboard() {
-            const db = getDB();
-            const totalCapital = db.investors.reduce((sum, i) => sum + Number(i.capital), 0);
+        async function renderAdminDashboard() {
+            const invSnap = await db.collection('investors').get();
+            const investors = invSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
+            const totalCapital = investors.reduce((sum, i) => sum + Number(i.capital), 0);
+            const adminObj = investors.find(i => i.isAdmin) || { netProfit: 0 };
+            
             document.getElementById('stat-capital').innerText = `$${totalCapital.toFixed(2)}`;
             document.getElementById('stat-share').innerText = `100% (إجمالي)`;
-            document.getElementById('stat-net-profit').innerText = `$${(db.admin.adminProfit || 0).toFixed(2)}`;
+            document.getElementById('stat-net-profit').innerText = `$${(adminObj.netProfit || 0).toFixed(2)}`;
 
             const invBody = document.getElementById('investors-table-body');
             invBody.innerHTML = '';
 
-            db.investors.forEach((inv, index) => {
+            investors.forEach((inv) => {
                 const share = totalCapital > 0 ? ((inv.capital / totalCapital) * 100).toFixed(2) : '0';
                 const roleBadge = inv.isAdmin ? `<span class="text-blue-600 dark:text-blue-400 font-bold">✔️ مدير (${inv.feeRate}%)</span>` : `<span class="text-gray-500">مستثمر عادي</span>`;
                 
@@ -306,19 +304,23 @@
                         <td class="p-3">${roleBadge}</td>
                         <td class="p-3 ${inv.netProfit >= 0 ? 'text-green-500' : 'text-red-500'} font-bold">$${(inv.netProfit || 0).toFixed(2)}</td>
                         <td class="p-3">
-                            <button onclick="deleteInvestor(${index})" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs font-bold">حذف</button>
+                            <button onclick="deleteInvestor('${inv.id}')" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs font-bold">حذف</button>
                         </td>
                     </tr>
                 `;
             });
 
-            renderTransactions(db.transactions, true);
+            const txSnap = await db.collection('transactions').orderBy('timestamp', 'desc').get();
+            const txs = txSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderTransactions(txs, true);
         }
 
-        function renderInvestorDashboard() {
-            const db = getDB();
-            const currentInv = db.investors.find(i => i.username === currentUser.username) || currentUser;
-            const totalCapital = db.investors.reduce((sum, i) => sum + Number(i.capital), 0);
+        async function renderInvestorDashboard() {
+            const invSnap = await db.collection('investors').get();
+            const investors = invSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            
+            const currentInv = investors.find(i => i.username === currentUser.username) || currentUser;
+            const totalCapital = investors.reduce((sum, i) => sum + Number(i.capital), 0);
             const share = totalCapital > 0 ? ((currentInv.capital / totalCapital) * 100).toFixed(2) : '0';
 
             document.getElementById('stat-capital').innerText = `$${Number(currentInv.capital).toFixed(2)}`;
@@ -326,8 +328,9 @@
             document.getElementById('profit-stat-title').innerText = 'صافي أرباحك';
             document.getElementById('stat-net-profit').innerText = `$${(currentInv.netProfit || 0).toFixed(2)}`;
 
-            const userTx = db.transactions.filter(t => t.username === currentInv.username);
-            renderTransactions(userTx, false);
+            const txSnap = await db.collection('transactions').where('username', '==', currentInv.username).get();
+            const txs = txSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderTransactions(txs, false);
         }
 
         function renderTransactions(txs, isAdmin) {
@@ -337,9 +340,8 @@
                 txBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-500">لا توجد عمليات مسجلة بعد</td></tr>`;
                 return;
             }
-            txs.slice().reverse().forEach((t, revIndex) => {
-                const originalIndex = txs.length - 1 - revIndex;
-                const deleteBtn = isAdmin ? `<td class="p-3"><button onclick="deleteTransaction(${originalIndex})" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs font-bold">حذف 🗑️</button></td>` : '';
+            txs.forEach((t) => {
+                const deleteBtn = isAdmin ? `<td class="p-3"><button onclick="deleteTransaction('${t.id}', '${t.username}', ${t.amount})" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs font-bold">حذف 🗑️</button></td>` : '';
                 
                 txBody.innerHTML += `
                     <tr class="border-b dark:border-gray-700">
@@ -353,42 +355,8 @@
             });
         }
 
-        function deleteTransaction(index) {
-            if (confirm('هل تريد حذف هذه الحركة وتعديل الأرباح؟')) {
-                const db = getDB();
-                const tx = db.transactions[index];
-
-                if (tx) {
-                    if (tx.username === db.admin.username) {
-                        db.admin.adminProfit = Math.max(0, (db.admin.adminProfit || 0) - tx.amount);
-                    } else {
-                        const inv = db.investors.find(i => i.username === tx.username);
-                        if (inv) {
-                            inv.netProfit = (inv.netProfit || 0) - tx.amount;
-                        }
-                    }
-                }
-
-                db.transactions.splice(index, 1);
-                saveDB(db);
-                renderAdminDashboard();
-            }
-        }
-
-        function clearAllTransactions() {
-            if (confirm('⚠️ هل أنت متأكد من مسح جميع الحركات وتصفير أرباح المحفظة بالكامل؟')) {
-                const db = getDB();
-                db.transactions = [];
-                db.admin.adminProfit = 0;
-                db.investors.forEach(i => i.netProfit = 0);
-                saveDB(db);
-                renderAdminDashboard();
-            }
-        }
-
-        function handleAddInvestor(e) {
+        async function handleAddInvestor(e) {
             e.preventDefault();
-            const db = getDB();
             const name = document.getElementById('inv-fullname').value.trim();
             const username = document.getElementById('inv-username').value.trim();
             const password = document.getElementById('inv-password').value.trim();
@@ -396,12 +364,13 @@
             const isAdmin = document.getElementById('is-admin-checkbox').checked;
             const feeRate = isAdmin ? parseFloat(document.getElementById('admin-fee-rate').value) : 0;
 
-            if (db.investors.some(i => i.username === username)) {
-                alert('اسم المستخدم هذا موجود مسبقاً!');
+            const check = await db.collection('investors').where('username', '==', username).get();
+            if (!check.empty) {
+                alert('اسم المستخدم موجود مسبقاً!');
                 return;
             }
 
-            db.investors.push({
+            await db.collection('investors').add({
                 full_name: name,
                 username: username,
                 password: password,
@@ -411,90 +380,110 @@
                 netProfit: 0
             });
 
-            saveDB(db);
-            alert('تم الحفظ والنشر بنجاح! ✔️');
+            alert('تم الحفظ والنشر سحابياً بنجاح! ✔️');
             e.target.reset();
             document.getElementById('fee-select-box').classList.add('hidden');
-            renderAdminDashboard();
         }
 
-        function deleteInvestor(index) {
-            if (confirm('هل أنت تأكد من الحذف؟')) {
-                const db = getDB();
-                db.investors.splice(index, 1);
-                saveDB(db);
-                renderAdminDashboard();
+        async function deleteInvestor(id) {
+            if (confirm('تأكد تحذف هذا المستثمر أونلاين؟')) {
+                await db.collection('investors').doc(id).delete();
             }
         }
 
-        function handleDistribution(e) {
+        async function deleteTransaction(txId, username, amount) {
+            if (confirm('تأكد تحذف هذه الحركة أونلاين؟')) {
+                await db.collection('transactions').doc(txId).delete();
+                const invSnap = await db.collection('investors').where('username', '==', username).get();
+                if (!invSnap.empty) {
+                    const doc = invSnap.docs[0];
+                    await db.collection('investors').doc(doc.id).update({
+                        netProfit: firebase.firestore.FieldValue.increment(-amount)
+                    });
+                }
+            }
+        }
+
+        async function clearAllTransactions() {
+            if (confirm('⚠️ مسح السجل وتصفير كل الأرباح سحابياً؟')) {
+                const txs = await db.collection('transactions').get();
+                txs.forEach(doc => doc.ref.delete());
+
+                const invs = await db.collection('investors').get();
+                invs.forEach(doc => doc.ref.update({ netProfit: 0 }));
+            }
+        }
+
+        async function handleDistribution(e) {
             e.preventDefault();
-            const db = getDB();
             const type = document.getElementById('dist-type').value;
             const amount = parseFloat(document.getElementById('dist-amount').value);
             const note = document.getElementById('dist-note').value;
             const date = new Date().toLocaleDateString('ar-EG');
 
-            const totalCapital = db.investors.reduce((sum, i) => sum + Number(i.capital), 0);
+            const invSnap = await db.collection('investors').get();
+            const investors = invSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            const totalCapital = investors.reduce((sum, i) => sum + Number(i.capital), 0);
 
             if (totalCapital === 0) {
-                alert('لا يوجد أعضاء في المحفظة لحساب الصفقة عليهم!');
+                alert('لا يوجد أعضاء لحساب التوزيع عليهم!');
                 return;
             }
 
             if (type === 'profit') {
                 let totalAdminCut = 0;
-
-                db.investors.forEach(inv => {
-                    let adminCutForThisInv = 0;
+                investors.forEach(inv => {
                     if (inv.isAdmin && inv.feeRate > 0) {
-                        adminCutForThisInv = amount * (inv.feeRate / 100);
-                        totalAdminCut += adminCutForThisInv;
+                        totalAdminCut += amount * (inv.feeRate / 100);
                     }
                 });
 
                 const remainingProfit = amount - totalAdminCut;
 
-                db.investors.forEach(inv => {
+                for (let inv of investors) {
                     const shareRatio = inv.capital / totalCapital;
                     let myProfit = remainingProfit * shareRatio;
 
                     if (inv.isAdmin && inv.feeRate > 0) {
-                        const myCut = amount * (inv.feeRate / 100);
-                        myProfit += myCut;
+                        myProfit += (amount * (inv.feeRate / 100));
                     }
 
-                    inv.netProfit = (inv.netProfit || 0) + myProfit;
+                    await db.collection('investors').doc(inv.id).update({
+                        netProfit: firebase.firestore.FieldValue.increment(myProfit)
+                    });
 
-                    db.transactions.push({
+                    await db.collection('transactions').add({
                         username: inv.username,
                         type: 'profit',
                         amount: myProfit,
                         note: inv.isAdmin ? `${note} (تتضمن النسبة الإضافية للمدير ✔️)` : note,
-                        date: date
+                        date: date,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
                     });
-                });
-
+                }
             } else {
-                db.investors.forEach(inv => {
+                for (let inv of investors) {
                     const shareRatio = inv.capital / totalCapital;
                     const lossAmount = amount * shareRatio;
-                    inv.netProfit = (inv.netProfit || 0) - lossAmount;
 
-                    db.transactions.push({
+                    await db.collection('investors').doc(inv.id).update({
+                        netProfit: firebase.firestore.FieldValue.increment(-lossAmount)
+                    });
+
+                    await db.collection('transactions').add({
                         username: inv.username,
                         type: 'loss',
                         amount: -lossAmount,
                         note: note,
-                        date: date
+                        date: date,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
                     });
-                });
+                }
             }
 
-            saveDB(db);
-            alert('تم حفظ ونشر توزيع الأرباح بنجاح! ✔️️');
+            alert('تم حفظ ونشر التوزيع أونلاين بنجاح! ✔️');
             e.target.reset();
-            renderAdminDashboard();
         }
     </script>
 </body>
